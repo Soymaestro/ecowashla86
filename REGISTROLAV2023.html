@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lavadero de Carros</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #201c31;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    #contenedor {
+      display: flex;
+      justify-content: space-between;
+      width: 80%;
+      margin: 0 auto;
+    }
+    #datosLavadero {
+      background-color: #3498db;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 45%;
+      color: #fff;
+    }
+    #registrosContainer {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 20px;
+      width: 45%;
+      max-height: 400px;
+      overflow-y: auto;
+      position: relative;
+    }
+    #botonesContainer {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    #botonDescargarExcel,
+    #botonLimpiarRegistros {
+      background-color: #3498db;
+      color: #fff;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #botonDescargarExcel:hover,
+    #botonLimpiarRegistros:hover {
+      background-color: #2980b9;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      color: #fff;
+    }
+    label {
+      margin-bottom: 8px;
+    }
+    input, select, button {
+      padding: 8px;
+      margin-bottom: 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #2ecc71;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #27ae60;
+    }
+    #listaRegistros {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    #listaRegistros li {
+      margin-bottom: 10px;
+      padding: 10px;
+      background-color: #f2f2f2;
+      border-radius: 6px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div id="contenedor">
+    <div id="datosLavadero">
+      <h1>Lavadero de Carros</h1>
+      <form id="lavadoForm">
+        <label for="placa">Número de Placa:</label>
+        <input type="text" id="placa" maxlength="6" oninput="this.value = this.value.toUpperCase()" required>
+
+        <label for="trabajador">Seleccionar Trabajador:</label>
+        <select id="trabajador">
+          <option value="1">Trabajador 1</option>
+          <option value="2">Trabajador 2</option>
+          <option value="3">Trabajador 3</option>
+          <option value="4">Trabajador 4</option>
+          <option value="5">Trabajador 5</option>
+          <option value="6">Trabajador 6</option>
+        </select>
+
+        <label for="vehiculo">Seleccionar Tipo de Vehículo:</label>
+        <select id="vehiculo" onchange="actualizarOpcionesLavado()">
+          <option value="carro">Carro</option>
+          <option value="moto">Moto</option>
+        </select>
+
+        <label for="lavado">Seleccionar Tipo de Lavado:</label>
+        <select id="lavado">
+          <!-- Opciones iniciales para lavado de carro -->
+          <option value="lavadoBasico">Lavado Básico</option>
+          <option value="lavadoCompleto">Lavado Completo</option>
+          <option value="encerado">Encerado</option>
+          <option value="aspirado">Aspirado</option>
+          <option value="desinfeccion">Desinfección</option>
+          <option value="lavadoMotor">Lavado de Motor</option>
+        </select>
+
+        <button type="button" onclick="agregarRegistro()">Agregar Registro</button>
+      </form>
+    </div>
+
+    <div id="registrosContainer">
+      <div id="botonesContainer">
+        <button id="botonDescargarExcel" onclick="descargarExcel()">Descargar Excel</button>
+        <button id="botonLimpiarRegistros" onclick="limpiarRegistros()">Limpiar Registros</button>
+      </div>
+      <h2>Registros</h2>
+      <ul id="listaRegistros"></ul>
+    </div>
+  </div>
+
+  <script>
+    function agregarRegistro() {
+      var placa = document.getElementById('placa').value;
+      var trabajador = document.getElementById('trabajador').value;
+      var vehiculo = document.getElementById('vehiculo').value;
+      var lavado = document.getElementById('lavado').value;
+      var fechaHora = obtenerFechaHoraActual();
+
+      var registro = `${placa} - Trabajador: ${trabajador} - Vehículo: ${vehiculo} - Lavado: ${lavado} - Fecha y Hora: ${fechaHora}`;
+      var listaRegistros = document.getElementById('listaRegistros');
+      var nuevoRegistro = document.createElement('li');
+      nuevoRegistro.appendChild(document.createTextNode(registro));
+      listaRegistros.insertBefore(nuevoRegistro, listaRegistros.firstChild);
+    }
+
+    function descargarExcel() {
+      var registros = [];
+      var listaRegistros = document.getElementById('listaRegistros').getElementsByTagName('li');
+      
+      for (var i = 0; i < listaRegistros.length; i++) {
+        registros.push([listaRegistros[i].textContent]);
+      }
+
+      var ws = XLSX.utils.aoa_to_sheet(registros);
+      var wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Registros");
+      XLSX.writeFile(wb, 'registros.xlsx');
+    }
+
+    function limpiarRegistros() {
+      var listaRegistros = document.getElementById('listaRegistros');
+      while (listaRegistros.firstChild) {
+        listaRegistros.removeChild(listaRegistros.firstChild);
+      }
+    }
+
+    function obtenerFechaHoraActual() {
+      var ahora = new Date();
+      var opcionesFechaHora = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' };
+      return ahora.toLocaleDateString('es-ES', opcionesFechaHora);
+    }
+
+    function actualizarOpcionesLavado() {
+      var vehiculoSeleccionado = document.getElementById('vehiculo').value;
+      var lavadoSelect = document.getElementById('lavado');
+      // Limpiamos las opciones actuales
+      lavadoSelect.innerHTML = '';
+
+      // Agregamos nuevas opciones según el tipo de vehículo
+      if (vehiculoSeleccionado === 'carro') {
+        agregarOpcionesCarro();
+      } else if (vehiculoSeleccionado === 'moto') {
+        agregarOpcionesMoto();
+      }
+    }
+
+    function agregarOpcionesCarro() {
+      var lavadoSelect = document.getElementById('lavado');
+      var opcionesCarro = [
+        'Lavado Básico',
+        'Lavado Completo',
+        'Encerado',
+        'Aspirado',
+        'Desinfección',
+        'Lavado de Motor'
+      ];
+
+      agregarOpciones(lavadoSelect, opcionesCarro);
+    }
+
+    function agregarOpcionesMoto() {
+      var lavadoSelect = document.getElementById('lavado');
+      var opcionesMoto = [
+        'Lavado Básico',
+        'Lavado Completo'
+      ];
+
+      agregarOpciones(lavadoSelect, opcionesMoto);
+    }
+
+    function agregarOpciones(select, opciones) {
+      for (var i = 0; i < opciones.length; i++) {
+        var opcion = document.createElement('option');
+        opcion.value = opciones[i].toLowerCase().replace(/\s/g, '');
+        opcion.text = opciones[i];
+        select.add(opcion);
+      }
+    }
+
+    // Al cargar la página, aseguramos que las opciones iniciales sean para carro
+    window.onload = function() {
+      actualizarOpcionesLavado();
+    };
+  </script>
+</body>
+</html>
+
+
+
+
+
