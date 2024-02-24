@@ -8,6 +8,6 @@ document.getElementById("login-form").addEventListener("submit", function(event)
         // Si las credenciales son correctas, redirigir al usuario a la página deseada
         window.location.href = "REGISTROLAV2023.html";
     } else {
-        alert("NOMBRE DE USUARIO O CONTRASEÑA INCORRECTA. Inténtalo de nuevo.");
+        alert("NOMBRE DE USUARIO O CONTRASEÑA INCORRECTA. Inténtalo de nuevo. Olvidaste la contraseña? Comunicate con Daniel Cruz para mas info");
     }
 });
